@@ -80,6 +80,14 @@ export interface Listing {
   };
 }
 
+export interface AppWaitlistEntry {
+  id: string;
+  email: string;
+  source?: string | null;
+  notifiedAt?: string | null;
+  createdAt: string;
+}
+
 export interface WaitlistEntry {
   id: string;
   first_name: string;

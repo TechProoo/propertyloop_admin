@@ -10,6 +10,7 @@ import Agents from "@/pages/Agents";
 import Vendors from "@/pages/Vendors";
 import Users from "@/pages/Users";
 import Waitlist from "@/pages/Waitlist";
+import AppWaitlist from "@/pages/AppWaitlist";
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
             <Route path="vendors" element={<Vendors />} />
             <Route path="users" element={<Users />} />
             <Route path="waitlist" element={<Waitlist />} />
+            <Route path="app-waitlist" element={<AppWaitlist />} />
           </Route>
         </Routes>
       </AuthProvider>

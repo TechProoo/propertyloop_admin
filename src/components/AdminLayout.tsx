@@ -12,6 +12,7 @@ import {
   X,
   ChevronLeft,
   CalendarDays,
+  Smartphone,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/cn";
@@ -24,6 +25,7 @@ const navItems = [
   { to: "/vendors", label: "Vendors", icon: Wrench },
   { to: "/users", label: "Users", icon: Users },
   { to: "/waitlist", label: "Waitlist", icon: ListChecks },
+  { to: "/app-waitlist", label: "App Waitlist", icon: Smartphone },
 ];
 
 export default function AdminLayout() {

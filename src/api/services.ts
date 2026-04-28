@@ -1,6 +1,7 @@
 import { api } from "./client";
 import type {
   AdminOverview,
+  AppWaitlistEntry,
   AuthResponse,
   Listing,
   ListingStatus,
@@ -132,6 +133,31 @@ export const adminService = {
       `/admin/viewings/${id}`,
     );
     return data;
+  },
+
+  // App waitlist (mobile app launch subscribers)
+  async listAppWaitlist(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  }) {
+    const { data } = await api.get<Paginated<AppWaitlistEntry>>(
+      "/admin/app-waitlist",
+      { params },
+    );
+    return data;
+  },
+  async deleteAppWaitlistEntry(id: string) {
+    const { data } = await api.delete<{ success: boolean }>(
+      `/admin/app-waitlist/${id}`,
+    );
+    return data;
+  },
+  async exportAppWaitlist(): Promise<Blob> {
+    const res = await api.get<Blob>("/admin/app-waitlist/export", {
+      responseType: "blob",
+    });
+    return res.data;
   },
 };
 
