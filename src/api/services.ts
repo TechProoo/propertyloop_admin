@@ -6,6 +6,8 @@ import type {
   ListingStatus,
   Paginated,
   User,
+  Viewing,
+  ViewingStatus,
   WaitlistEntry,
 } from "./types";
 
@@ -102,6 +104,33 @@ export const adminService = {
     const { data } = await api.patch(`/admin/vendors/${id}/verified`, {
       verified,
     });
+    return data;
+  },
+
+  // Viewings
+  async listViewings(params: {
+    page?: number;
+    limit?: number;
+    status?: ViewingStatus;
+    upcoming?: boolean;
+    search?: string;
+  }) {
+    const { data } = await api.get<Paginated<Viewing>>("/admin/viewings", {
+      params,
+    });
+    return data;
+  },
+  async setViewingStatus(id: string, status: ViewingStatus) {
+    const { data } = await api.patch<Viewing>(
+      `/admin/viewings/${id}/status`,
+      { status },
+    );
+    return data;
+  },
+  async deleteViewing(id: string) {
+    const { data } = await api.delete<{ success: boolean }>(
+      `/admin/viewings/${id}`,
+    );
     return data;
   },
 };

@@ -5,6 +5,7 @@ import AdminLayout from "@/components/AdminLayout";
 import Login from "@/pages/Login";
 import Overview from "@/pages/Overview";
 import Listings from "@/pages/Listings";
+import Viewings from "@/pages/Viewings";
 import Agents from "@/pages/Agents";
 import Vendors from "@/pages/Vendors";
 import Users from "@/pages/Users";
@@ -26,6 +27,7 @@ export default function App() {
           >
             <Route index element={<Overview />} />
             <Route path="listings" element={<Listings />} />
+            <Route path="viewings" element={<Viewings />} />
             <Route path="agents" element={<Agents />} />
             <Route path="vendors" element={<Vendors />} />
             <Route path="users" element={<Users />} />

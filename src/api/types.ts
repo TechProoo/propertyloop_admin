@@ -120,3 +120,39 @@ export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
 }
+
+export type ViewingStatus =
+  | "PENDING"
+  | "CONFIRMED"
+  | "COMPLETED"
+  | "CANCELLED"
+  | "NO_SHOW";
+
+export interface Viewing {
+  id: string;
+  agentId: string;
+  listingId: string;
+  buyerUserId?: string | null;
+  clientName: string;
+  clientPhone: string;
+  clientEmail?: string | null;
+  scheduledFor: string;
+  status: ViewingStatus;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+  listing?: {
+    id: string;
+    title: string;
+    coverImage?: string;
+    location?: string;
+    slug?: string;
+  };
+  agent?: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string | null;
+    avatarUrl?: string | null;
+  };
+}

@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   ChevronLeft,
+  CalendarDays,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/cn";
@@ -18,6 +19,7 @@ import { cn } from "@/lib/cn";
 const navItems = [
   { to: "/", label: "Overview", icon: LayoutDashboard, end: true },
   { to: "/listings", label: "Listings", icon: Home },
+  { to: "/viewings", label: "Viewings", icon: CalendarDays },
   { to: "/agents", label: "Agents", icon: UserCheck },
   { to: "/vendors", label: "Vendors", icon: Wrench },
   { to: "/users", label: "Users", icon: Users },
