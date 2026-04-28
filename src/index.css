@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme {
+  /* Fonts */
+  --font-heading: "Libre Franklin", "Inter", sans-serif;
+  --font-body: "Eczar", serif;
+
+  /* Brand — matches main frontend */
+  --color-primary: #1f6f43;
+  --color-primary-dark: #1a3d2a;
+  --color-primary-light: #2d5a3f;
+  --color-primary-muted: #4a7a5c;
+
+  /* Backgrounds */
+  --color-bg: #f5f0eb;
+  --color-bg-card: rgba(255, 255, 255, 0.85);
+  --color-bg-accent: rgba(31, 111, 67, 0.04);
+
+  /* Borders */
+  --color-border: rgba(31, 111, 67, 0.2);
+  --color-border-light: rgba(31, 111, 67, 0.15);
+
+  /* Text */
+  --color-text-heading: #1a3d2a;
+  --color-text-body: #2d5a3f;
+  --color-text-secondary: #4a7a5c;
+  --color-text-subtle: rgba(31, 111, 67, 0.5);
+
+  /* Glow */
+  --color-glow: rgba(31, 111, 67, 0.4);
+  --color-glow-strong: rgba(31, 111, 67, 0.5);
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  font-family: var(--font-heading);
+  background: var(--color-bg);
+}
+
+body {
+  color: var(--color-text-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Decorative blurred orbs that sit behind glass surfaces */
+.bg-decor {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bg-decor::before,
+.bg-decor::after {
+  content: "";
+  position: absolute;
+  width: 36rem;
+  height: 36rem;
+  border-radius: 9999px;
+  filter: blur(120px);
+  opacity: 0.5;
+}
+
+.bg-decor::before {
+  top: -8rem;
+  right: -8rem;
+  background: radial-gradient(circle, rgba(31, 111, 67, 0.18) 0%, transparent 70%);
+}
+
+.bg-decor::after {
+  bottom: -10rem;
+  left: -10rem;
+  background: radial-gradient(circle, rgba(31, 111, 67, 0.12) 0%, transparent 70%);
+}
+
+/* Glass surface utility — used everywhere */
+.glass {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.glass-dark {
+  background: hsl(160, 30%, 12%);
+  border: 1px solid hsl(160, 20%, 22%);
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
