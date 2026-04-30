@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { usePageTitle } from "@/lib/usePageTitle";
+import { actionLoader } from "@/lib/actionLoader";
 
 export default function Login() {
   usePageTitle("Sign in");
@@ -30,6 +31,7 @@ export default function Login() {
       return;
     }
     setSubmitting(true);
+    actionLoader.show("Signing in…");
     try {
       await login(email.trim(), password);
       navigate(from, { replace: true });
@@ -41,6 +43,7 @@ export default function Login() {
       );
     } finally {
       setSubmitting(false);
+      actionLoader.hide();
     }
   };
 

@@ -12,6 +12,7 @@ import {
   Spinner,
 } from "@/components/ui";
 import { usePageTitle } from "@/lib/usePageTitle";
+import { actionLoader } from "@/lib/actionLoader";
 
 const ROLE_FILTERS: { value: "ALL" | Role; label: string }[] = [
   { value: "ALL", label: "All" },
@@ -79,6 +80,7 @@ export default function Users() {
       return;
     }
     setWorking((w) => ({ ...w, [u.id]: true }));
+    actionLoader.show(u.isActive ? "Suspending user…" : "Reinstating user…");
     try {
       const updated = await adminService.setUserActive(u.id, !u.isActive);
       setItems((prev) =>
@@ -88,6 +90,7 @@ export default function Users() {
       alert(e?.response?.data?.message ?? "Failed to update user");
     } finally {
       setWorking((w) => ({ ...w, [u.id]: false }));
+      actionLoader.hide();
     }
   };
 

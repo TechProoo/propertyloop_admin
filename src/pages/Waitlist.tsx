@@ -19,6 +19,7 @@ import {
   Spinner,
 } from "@/components/ui";
 import { usePageTitle } from "@/lib/usePageTitle";
+import { actionLoader } from "@/lib/actionLoader";
 
 const TYPE_LABELS: Record<string, string> = {
   REAL_ESTATE_AGENT: "Real Estate Agent",
@@ -85,6 +86,7 @@ export default function Waitlist() {
   const remove = async (id: string) => {
     if (!confirm("Delete this waitlist entry? This cannot be undone.")) return;
     setWorking((w) => ({ ...w, [id]: true }));
+    actionLoader.show("Deleting…");
     try {
       await waitlistService.remove(id);
       setItems((prev) => prev.filter((x) => x.id !== id));
@@ -92,11 +94,13 @@ export default function Waitlist() {
       alert(e?.response?.data?.message ?? "Failed to delete entry");
     } finally {
       setWorking((w) => ({ ...w, [id]: false }));
+      actionLoader.hide();
     }
   };
 
   const exportCsv = async () => {
     setExporting(true);
+    actionLoader.show("Exporting CSV…");
     try {
       const blob = await waitlistService.exportCsv();
       const url = URL.createObjectURL(blob);
@@ -111,6 +115,7 @@ export default function Waitlist() {
       alert("Export failed. Try again.");
     } finally {
       setExporting(false);
+      actionLoader.hide();
     }
   };
 

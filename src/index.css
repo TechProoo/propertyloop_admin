@@ -107,3 +107,19 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Bouncing-ball loader (used in <ActionOverlay /> and inline) */
+@keyframes ball-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+.ball-bounce {
+  animation: ball-bounce 0.65s ease-in-out infinite;
+}

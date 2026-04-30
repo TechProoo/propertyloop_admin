@@ -13,6 +13,7 @@ import {
   Spinner,
 } from "@/components/ui";
 import { usePageTitle } from "@/lib/usePageTitle";
+import { actionLoader } from "@/lib/actionLoader";
 
 const FILTERS = [
   { value: "ALL", label: "All" },
@@ -60,6 +61,7 @@ export default function Vendors() {
 
   const setVerified = async (id: string, verified: boolean) => {
     setWorking((w) => ({ ...w, [id]: true }));
+    actionLoader.show(verified ? "Verifying vendor…" : "Unverifying vendor…");
     try {
       await adminService.setVendorVerified(id, verified);
       setItems((prev) =>
@@ -77,11 +79,13 @@ export default function Vendors() {
       );
     } finally {
       setWorking((w) => ({ ...w, [id]: false }));
+      actionLoader.hide();
     }
   };
 
   const toggleSuspend = async (id: string, isActive: boolean) => {
     setWorking((w) => ({ ...w, [id]: true }));
+    actionLoader.show(isActive ? "Suspending vendor…" : "Reinstating vendor…");
     try {
       const updated = await adminService.setUserActive(id, !isActive);
       setItems((prev) =>
@@ -89,6 +93,7 @@ export default function Vendors() {
       );
     } finally {
       setWorking((w) => ({ ...w, [id]: false }));
+      actionLoader.hide();
     }
   };
 

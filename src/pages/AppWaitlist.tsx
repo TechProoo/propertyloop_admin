@@ -12,6 +12,7 @@ import {
   Spinner,
 } from "@/components/ui";
 import { usePageTitle } from "@/lib/usePageTitle";
+import { actionLoader } from "@/lib/actionLoader";
 
 const SOURCE_LABELS: Record<string, string> = {
   homepage_cta: "Homepage CTA",
@@ -66,6 +67,7 @@ export default function AppWaitlist() {
   const remove = async (id: string) => {
     if (!confirm("Delete this app-waitlist entry?")) return;
     setWorking((w) => ({ ...w, [id]: true }));
+    actionLoader.show("Deleting…");
     try {
       await adminService.deleteAppWaitlistEntry(id);
       setItems((prev) => prev.filter((x) => x.id !== id));
@@ -73,11 +75,13 @@ export default function AppWaitlist() {
       alert(e?.response?.data?.message ?? "Failed to delete entry");
     } finally {
       setWorking((w) => ({ ...w, [id]: false }));
+      actionLoader.hide();
     }
   };
 
   const exportCsv = async () => {
     setExporting(true);
+    actionLoader.show("Exporting CSV…");
     try {
       const blob = await adminService.exportAppWaitlist();
       const url = URL.createObjectURL(blob);
@@ -92,6 +96,7 @@ export default function AppWaitlist() {
       alert("Export failed. Try again.");
     } finally {
       setExporting(false);
+      actionLoader.hide();
     }
   };
 

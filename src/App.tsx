@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import RequireAuth from "@/components/RequireAuth";
 import AdminLayout from "@/components/AdminLayout";
+import { ActionOverlay } from "@/components/ui";
 import Login from "@/pages/Login";
 import Overview from "@/pages/Overview";
 import Listings from "@/pages/Listings";
@@ -16,6 +17,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <ActionOverlay />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route

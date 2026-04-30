@@ -13,6 +13,7 @@ import {
   Spinner,
 } from "@/components/ui";
 import { usePageTitle } from "@/lib/usePageTitle";
+import { actionLoader } from "@/lib/actionLoader";
 
 const STATUSES: { value: "ALL" | ListingStatus; label: string }[] = [
   { value: "ALL", label: "All" },
@@ -89,6 +90,7 @@ export default function Listings() {
   const handleStatusChange = async (id: string, status: ListingStatus) => {
     setUpdating((u) => ({ ...u, [id]: true }));
     setOpenMenu(null);
+    actionLoader.show("Updating listing…");
     try {
       const updated = await adminService.setListingStatus(id, status);
       setItems((prev) => prev.map((l) => (l.id === id ? { ...l, ...updated } : l)));
@@ -96,6 +98,7 @@ export default function Listings() {
       // ignore
     } finally {
       setUpdating((u) => ({ ...u, [id]: false }));
+      actionLoader.hide();
     }
   };
 

@@ -19,6 +19,7 @@ import {
   Spinner,
 } from "@/components/ui";
 import { usePageTitle } from "@/lib/usePageTitle";
+import { actionLoader } from "@/lib/actionLoader";
 
 const STATUSES: { value: "ALL" | ViewingStatus; label: string }[] = [
   { value: "ALL", label: "All" },
@@ -93,6 +94,7 @@ export default function Viewings() {
   const handleStatusChange = async (id: string, status: ViewingStatus) => {
     setUpdating((u) => ({ ...u, [id]: true }));
     setOpenMenu(null);
+    actionLoader.show("Updating viewing…");
     try {
       const updated = await adminService.setViewingStatus(id, status);
       setItems((prev) => prev.map((v) => (v.id === id ? { ...v, ...updated } : v)));
@@ -100,12 +102,14 @@ export default function Viewings() {
       // ignore
     } finally {
       setUpdating((u) => ({ ...u, [id]: false }));
+      actionLoader.hide();
     }
   };
 
   const handleDelete = async (v: Viewing) => {
     if (!confirm(`Delete viewing for ${v.clientName}? This cannot be undone.`)) return;
     setUpdating((u) => ({ ...u, [v.id]: true }));
+    actionLoader.show("Deleting viewing…");
     try {
       await adminService.deleteViewing(v.id);
       setItems((prev) => prev.filter((x) => x.id !== v.id));
@@ -113,6 +117,7 @@ export default function Viewings() {
       alert(e?.response?.data?.message ?? "Failed to delete viewing");
     } finally {
       setUpdating((u) => ({ ...u, [v.id]: false }));
+      actionLoader.hide();
     }
   };
 

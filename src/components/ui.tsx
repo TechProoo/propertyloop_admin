@@ -1,5 +1,7 @@
 import { cn } from "@/lib/cn";
 import type { ReactNode } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useActionLoader } from "@/lib/actionLoader";
 
 export function GlassCard({
   className,
@@ -127,6 +129,68 @@ export function Spinner({ className }: { className?: string }) {
         className,
       )}
     />
+  );
+}
+
+export function BouncingBalls({
+  size = "md",
+  className,
+}: {
+  size?: "sm" | "md" | "lg";
+  className?: string;
+}) {
+  const dot = {
+    sm: "w-1.5 h-1.5",
+    md: "w-2.5 h-2.5",
+    lg: "w-3.5 h-3.5",
+  }[size];
+  const gap = {
+    sm: "gap-1",
+    md: "gap-1.5",
+    lg: "gap-2",
+  }[size];
+  return (
+    <div className={cn("flex items-end justify-center", gap, className)}>
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className={cn("ball-bounce rounded-full bg-primary", dot)}
+          style={{ animationDelay: `${i * 0.13}s` }}
+        />
+      ))}
+    </div>
+  );
+}
+
+export function ActionOverlay() {
+  const { open, label } = useActionLoader();
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+          aria-live="polite"
+          aria-busy="true"
+        >
+          <motion.div
+            initial={{ scale: 0.92, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+            className="glass-strong rounded-2xl px-9 py-7 flex flex-col items-center gap-4 min-w-50"
+          >
+            <BouncingBalls size="md" />
+            <p className="font-heading font-semibold text-primary-dark text-sm tracking-wide">
+              {label}
+            </p>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
