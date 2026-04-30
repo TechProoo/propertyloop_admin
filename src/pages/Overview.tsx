@@ -11,6 +11,7 @@ import {
 import { adminService } from "@/api/services";
 import type { AdminOverview } from "@/api/types";
 import { GlassCard, PageHeader, Spinner } from "@/components/ui";
+import { usePageTitle } from "@/lib/usePageTitle";
 
 const cards: {
   key: keyof AdminOverview;
@@ -57,6 +58,7 @@ const cards: {
 ];
 
 export default function Overview() {
+  usePageTitle("Overview");
   const [data, setData] = useState<AdminOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

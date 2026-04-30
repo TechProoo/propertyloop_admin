@@ -11,6 +11,7 @@ import {
   SearchInput,
   Spinner,
 } from "@/components/ui";
+import { usePageTitle } from "@/lib/usePageTitle";
 
 const ROLE_FILTERS: { value: "ALL" | Role; label: string }[] = [
   { value: "ALL", label: "All" },
@@ -21,6 +22,7 @@ const ROLE_FILTERS: { value: "ALL" | Role; label: string }[] = [
 ];
 
 export default function Users() {
+  usePageTitle("Users");
   const [items, setItems] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

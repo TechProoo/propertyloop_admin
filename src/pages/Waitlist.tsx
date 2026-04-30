@@ -18,6 +18,7 @@ import {
   SearchInput,
   Spinner,
 } from "@/components/ui";
+import { usePageTitle } from "@/lib/usePageTitle";
 
 const TYPE_LABELS: Record<string, string> = {
   REAL_ESTATE_AGENT: "Real Estate Agent",
@@ -35,6 +36,7 @@ const TABS: { value: "ALL" | WaitlistEntry["type"]; label: string }[] = [
 ];
 
 export default function Waitlist() {
+  usePageTitle("Waitlist");
   const [items, setItems] = useState<WaitlistEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

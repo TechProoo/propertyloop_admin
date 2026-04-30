@@ -12,6 +12,7 @@ import {
   SearchInput,
   Spinner,
 } from "@/components/ui";
+import { usePageTitle } from "@/lib/usePageTitle";
 
 const STATUSES: { value: "ALL" | ListingStatus; label: string }[] = [
   { value: "ALL", label: "All" },
@@ -41,6 +42,7 @@ function statusVariant(s: ListingStatus): React.ComponentProps<typeof Pill>["var
 }
 
 export default function Listings() {
+  usePageTitle("Listings");
   const [items, setItems] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

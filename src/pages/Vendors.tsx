@@ -12,6 +12,7 @@ import {
   SearchInput,
   Spinner,
 } from "@/components/ui";
+import { usePageTitle } from "@/lib/usePageTitle";
 
 const FILTERS = [
   { value: "ALL", label: "All" },
@@ -20,6 +21,7 @@ const FILTERS = [
 ] as const;
 
 export default function Vendors() {
+  usePageTitle("Vendors");
   const [items, setItems] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

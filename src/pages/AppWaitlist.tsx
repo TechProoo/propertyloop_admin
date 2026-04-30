@@ -11,6 +11,7 @@ import {
   SearchInput,
   Spinner,
 } from "@/components/ui";
+import { usePageTitle } from "@/lib/usePageTitle";
 
 const SOURCE_LABELS: Record<string, string> = {
   homepage_cta: "Homepage CTA",
@@ -18,6 +19,7 @@ const SOURCE_LABELS: Record<string, string> = {
 };
 
 export default function AppWaitlist() {
+  usePageTitle("App Waitlist");
   const [items, setItems] = useState<AppWaitlistEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

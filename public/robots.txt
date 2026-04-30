@@ -1,0 +1,3 @@
+# Admin console — never index any of this.
+User-agent: *
+Disallow: /

@@ -3,8 +3,10 @@ import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { usePageTitle } from "@/lib/usePageTitle";
 
 export default function Login() {
+  usePageTitle("Sign in");
   const { user, loading, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

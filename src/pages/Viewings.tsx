@@ -18,6 +18,7 @@ import {
   SearchInput,
   Spinner,
 } from "@/components/ui";
+import { usePageTitle } from "@/lib/usePageTitle";
 
 const STATUSES: { value: "ALL" | ViewingStatus; label: string }[] = [
   { value: "ALL", label: "All" },
@@ -46,6 +47,7 @@ function statusVariant(s: ViewingStatus): React.ComponentProps<typeof Pill>["var
 }
 
 export default function Viewings() {
+  usePageTitle("Viewings");
   const [items, setItems] = useState<Viewing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
