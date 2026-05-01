@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ShieldCheck, ShieldOff, Wrench, Phone, Mail } from "lucide-react";
+import {
+  ShieldCheck,
+  ShieldOff,
+  Wrench,
+  Phone,
+  Mail,
+  MessageSquare,
+} from "lucide-react";
 import { adminService } from "@/api/services";
+import messagesService from "@/api/messagesService";
 import type { User } from "@/api/types";
 import {
   Button,
@@ -23,11 +32,26 @@ const FILTERS = [
 
 export default function Vendors() {
   usePageTitle("Vendors");
+  const navigate = useNavigate();
   const [items, setItems] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["value"]>("ALL");
+
+  const handleMessage = async (id: string) => {
+    setWorking((w) => ({ ...w, [id]: true }));
+    actionLoader.show("Opening conversation…");
+    try {
+      const res = await messagesService.startConversation({ recipientId: id });
+      navigate(`/messages?with=${res.conversationId}`);
+    } catch (e: any) {
+      alert(e?.response?.data?.message ?? "Couldn't start conversation");
+    } finally {
+      setWorking((w) => ({ ...w, [id]: false }));
+      actionLoader.hide();
+    }
+  };
   const [working, setWorking] = useState<Record<string, boolean>>({});
 
   const load = async () => {
@@ -224,6 +248,15 @@ export default function Vendors() {
                       onClick={() => toggleSuspend(u.id, u.isActive)}
                     >
                       {suspended ? "Reinstate" : "Suspend"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={working[u.id]}
+                      onClick={() => handleMessage(u.id)}
+                      title={`Message ${u.name}`}
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" /> Message
                     </Button>
                   </div>
                 </GlassCard>

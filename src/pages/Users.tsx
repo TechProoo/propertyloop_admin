@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Users as UsersIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Users as UsersIcon, MessageSquare } from "lucide-react";
 import { adminService } from "@/api/services";
+import messagesService from "@/api/messagesService";
 import type { Role, User } from "@/api/types";
 import {
   Button,
@@ -24,12 +26,27 @@ const ROLE_FILTERS: { value: "ALL" | Role; label: string }[] = [
 
 export default function Users() {
   usePageTitle("Users");
+  const navigate = useNavigate();
   const [items, setItems] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<"ALL" | Role>("ALL");
   const [working, setWorking] = useState<Record<string, boolean>>({});
+
+  const handleMessage = async (id: string) => {
+    setWorking((w) => ({ ...w, [id]: true }));
+    actionLoader.show("Opening conversation…");
+    try {
+      const res = await messagesService.startConversation({ recipientId: id });
+      navigate(`/messages?with=${res.conversationId}`);
+    } catch (e: any) {
+      alert(e?.response?.data?.message ?? "Couldn't start conversation");
+    } finally {
+      setWorking((w) => ({ ...w, [id]: false }));
+      actionLoader.hide();
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -202,18 +219,30 @@ export default function Users() {
                       {new Date(u.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-5 py-3 text-right">
-                      <Button
-                        size="sm"
-                        variant={u.isActive ? "danger" : "primary"}
-                        disabled={working[u.id] || u.role === "ADMIN"}
-                        onClick={() => toggleSuspend(u)}
-                      >
-                        {u.role === "ADMIN"
-                          ? "—"
-                          : u.isActive
-                            ? "Suspend"
-                            : "Reinstate"}
-                      </Button>
+                      <div className="inline-flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={working[u.id]}
+                          onClick={() => handleMessage(u.id)}
+                          title={`Message ${u.name}`}
+                          aria-label={`Message ${u.name}`}
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={u.isActive ? "danger" : "primary"}
+                          disabled={working[u.id] || u.role === "ADMIN"}
+                          onClick={() => toggleSuspend(u)}
+                        >
+                          {u.role === "ADMIN"
+                            ? "—"
+                            : u.isActive
+                              ? "Suspend"
+                              : "Reinstate"}
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -251,14 +280,30 @@ export default function Users() {
                     Joined {new Date(u.createdAt).toLocaleDateString()}
                   </p>
                 </div>
-                <Button
-                  size="sm"
-                  variant={u.isActive ? "danger" : "primary"}
-                  disabled={working[u.id] || u.role === "ADMIN"}
-                  onClick={() => toggleSuspend(u)}
-                >
-                  {u.role === "ADMIN" ? "—" : u.isActive ? "Suspend" : "Reinstate"}
-                </Button>
+                <div className="flex flex-col gap-1.5 shrink-0">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={working[u.id]}
+                    onClick={() => handleMessage(u.id)}
+                    title={`Message ${u.name}`}
+                    aria-label={`Message ${u.name}`}
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={u.isActive ? "danger" : "primary"}
+                    disabled={working[u.id] || u.role === "ADMIN"}
+                    onClick={() => toggleSuspend(u)}
+                  >
+                    {u.role === "ADMIN"
+                      ? "—"
+                      : u.isActive
+                        ? "Suspend"
+                        : "Reinstate"}
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
