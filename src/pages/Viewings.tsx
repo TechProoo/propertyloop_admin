@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   CalendarDays,
   ChevronDown,
   Home,
   MapPin,
+  MessageSquare,
   Phone,
   Trash2,
 } from "lucide-react";
 import { adminService } from "@/api/services";
+import messagesService from "@/api/messagesService";
 import type { Viewing, ViewingStatus } from "@/api/types";
 import {
   Button,
@@ -49,6 +52,7 @@ function statusVariant(s: ViewingStatus): React.ComponentProps<typeof Pill>["var
 
 export default function Viewings() {
   usePageTitle("Viewings");
+  const navigate = useNavigate();
   const [items, setItems] = useState<Viewing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +60,29 @@ export default function Viewings() {
   const [filter, setFilter] = useState<"ALL" | ViewingStatus>("ALL");
   const [updating, setUpdating] = useState<Record<string, boolean>>({});
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+
+  const handleMessageBuyer = async (v: Viewing) => {
+    if (!v.buyerUserId) {
+      alert(
+        "This viewing has no registered buyer (guest booking). Cannot start a chat.",
+      );
+      return;
+    }
+    setUpdating((u) => ({ ...u, [v.id]: true }));
+    actionLoader.show("Opening conversation…");
+    try {
+      const res = await messagesService.startConversation({
+        recipientId: v.buyerUserId,
+        viewingId: v.id,
+      });
+      navigate(`/messages?with=${res.conversationId}`);
+    } catch (e: any) {
+      alert(e?.response?.data?.message ?? "Couldn't start conversation");
+    } finally {
+      setUpdating((u) => ({ ...u, [v.id]: false }));
+      actionLoader.hide();
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -286,6 +313,19 @@ export default function Viewings() {
                       )}
                     </div>
 
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={updating[v.id] || !v.buyerUserId}
+                      onClick={() => handleMessageBuyer(v)}
+                      title={
+                        v.buyerUserId
+                          ? "Message the buyer about this viewing"
+                          : "Guest booking — no registered user to message"
+                      }
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" /> Message
+                    </Button>
                     <Button
                       size="sm"
                       variant="danger"
