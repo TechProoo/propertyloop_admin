@@ -3,9 +3,12 @@ import type {
   AdminOverview,
   AppWaitlistEntry,
   AuthResponse,
+  CreateFeaturedPropertyPayload,
+  FeaturedProperty,
   Listing,
   ListingStatus,
   Paginated,
+  UpdateFeaturedPropertyPayload,
   User,
   Viewing,
   ViewingStatus,
@@ -197,6 +200,54 @@ export const adminService = {
       responseType: "blob",
     });
     return res.data;
+  },
+
+  // Featured Properties (hero gallery ad slots)
+  async listFeaturedProperties(): Promise<FeaturedProperty[]> {
+    const { data } = await api.get<FeaturedProperty[]>(
+      "/admin/featured-properties",
+    );
+    return data;
+  },
+  async createFeaturedProperty(
+    payload: CreateFeaturedPropertyPayload,
+  ): Promise<FeaturedProperty> {
+    const { data } = await api.post<FeaturedProperty>(
+      "/admin/featured-properties",
+      payload,
+    );
+    return data;
+  },
+  async updateFeaturedProperty(
+    id: string,
+    payload: UpdateFeaturedPropertyPayload,
+  ): Promise<FeaturedProperty> {
+    const { data } = await api.patch<FeaturedProperty>(
+      `/admin/featured-properties/${id}`,
+      payload,
+    );
+    return data;
+  },
+  async deleteFeaturedProperty(id: string): Promise<{ success: boolean }> {
+    const { data } = await api.delete<{ success: boolean }>(
+      `/admin/featured-properties/${id}`,
+    );
+    return data;
+  },
+};
+
+// ─── Upload ──────────────────────────────────────────────────────────────
+
+export const uploadService = {
+  async uploadFeaturedPropertyImage(file: File): Promise<string> {
+    const form = new FormData();
+    form.append("file", file);
+    const { data } = await api.post<{ url: string }>(
+      "/upload/featured-property-image",
+      form,
+      { headers: { "Content-Type": "multipart/form-data" } },
+    );
+    return data.url;
   },
 };
 

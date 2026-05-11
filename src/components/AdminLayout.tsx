@@ -14,6 +14,7 @@ import {
   CalendarDays,
   Smartphone,
   MessageSquare,
+  Star,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/cn";
@@ -28,6 +29,7 @@ const navItems = [
   { to: "/users", label: "Users", icon: Users },
   { to: "/waitlist", label: "Waitlist", icon: ListChecks },
   { to: "/app-waitlist", label: "App Waitlist", icon: Smartphone },
+  { to: "/featured-ads", label: "Featured Ads", icon: Star },
 ];
 
 export default function AdminLayout() {
@@ -70,7 +72,11 @@ export default function AdminLayout() {
             className="w-8 h-8 rounded-lg flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-colors"
             aria-label="Toggle sidebar"
           >
-            {collapsed ? <Menu className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            {collapsed ? (
+              <Menu className="w-4 h-4" />
+            ) : (
+              <ChevronLeft className="w-4 h-4" />
+            )}
           </button>
         </div>
 
@@ -98,7 +104,9 @@ export default function AdminLayout() {
                       isActive && "text-[hsl(142,71%,55%)]",
                     )}
                   />
-                  {!collapsed && <span className="text-sm font-medium">{label}</span>}
+                  {!collapsed && (
+                    <span className="text-sm font-medium">{label}</span>
+                  )}
                 </>
               )}
             </NavLink>
@@ -117,8 +125,12 @@ export default function AdminLayout() {
             </div>
             {!collapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-medium truncate">{user?.name}</p>
-                <p className="text-white/40 text-[11px] truncate">Administrator</p>
+                <p className="text-white text-sm font-medium truncate">
+                  {user?.name}
+                </p>
+                <p className="text-white/40 text-[11px] truncate">
+                  Administrator
+                </p>
               </div>
             )}
           </div>
@@ -210,7 +222,9 @@ export default function AdminLayout() {
               <h1 className="font-heading font-bold text-primary-dark text-base">
                 Admin Console
               </h1>
-              <p className="text-text-subtle text-[11px]">Platform operations</p>
+              <p className="text-text-subtle text-[11px]">
+                Platform operations
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">

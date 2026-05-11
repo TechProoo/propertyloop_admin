@@ -26,7 +26,9 @@ const STATUSES: { value: "ALL" | ListingStatus; label: string }[] = [
   { value: "ARCHIVED", label: "Archived" },
 ];
 
-function statusVariant(s: ListingStatus): React.ComponentProps<typeof Pill>["variant"] {
+function statusVariant(
+  s: ListingStatus,
+): React.ComponentProps<typeof Pill>["variant"] {
   switch (s) {
     case "ACTIVE":
       return "primary";
@@ -95,7 +97,9 @@ export default function Listings() {
     actionLoader.show("Updating listing…");
     try {
       const updated = await adminService.setListingStatus(id, status);
-      setItems((prev) => prev.map((l) => (l.id === id ? { ...l, ...updated } : l)));
+      setItems((prev) =>
+        prev.map((l) => (l.id === id ? { ...l, ...updated } : l)),
+      );
     } catch {
       // ignore
     } finally {
@@ -106,21 +110,16 @@ export default function Listings() {
 
   return (
     <div>
-      {editingListing && (
-        <EditListingModal
-          listing={editingListing}
-          onClose={() => setEditingListing(null)}
-          onSaved={(updated) =>
-            setItems((prev) =>
-              prev.map((l) => (l.id === updated.id ? updated : l)),
-            )
-          }
-        />
-      )}
       <PageHeader
         title="Listings"
         subtitle="Review, approve and moderate property listings."
-        actions={<SearchInput value={search} onChange={setSearch} placeholder="Search by title, address, location…" />}
+        actions={
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Search by title, address, location…"
+          />
+        }
       />
 
       {/* Filter chips */}
@@ -148,7 +147,9 @@ export default function Listings() {
           <Spinner />
         </GlassCard>
       ) : error ? (
-        <GlassCard className="py-10 text-center text-red-600 text-sm">{error}</GlassCard>
+        <GlassCard className="py-10 text-center text-red-600 text-sm">
+          {error}
+        </GlassCard>
       ) : items.length === 0 ? (
         <GlassCard>
           <EmptyState
@@ -167,9 +168,7 @@ export default function Listings() {
               transition={{ delay: i * 0.02 }}
             >
               <GlassCard
-                className={`p-0 relative ${
-                  openMenu === l.id ? "z-50" : "z-0"
-                }`}
+                className={`p-0 relative ${openMenu === l.id ? "z-50" : "z-0"}`}
               >
                 {l.coverImage ? (
                   <img
@@ -218,52 +217,69 @@ export default function Listings() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setEditingListing(l)}
+                      onClick={() => {
+                        setOpenMenu(null);
+                        setEditingListing(l);
+                      }}
                       className="flex-none"
                     >
                       <Pencil className="w-3.5 h-3.5" />
                       Edit
                     </Button>
-                  <div className="relative flex-1">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setOpenMenu(openMenu === l.id ? null : l.id)}
-                      disabled={updating[l.id]}
-                      className="w-full justify-between"
-                    >
-                      <span>{updating[l.id] ? "Saving…" : "Set status"}</span>
-                      <ChevronDown className="w-3.5 h-3.5" />
-                    </Button>
-                    {openMenu === l.id && (
-                      <div className="absolute left-0 right-0 mt-1 z-50 glass-strong rounded-xl overflow-hidden shadow-xl">
-                        {(
-                          [
-                            "PENDING_REVIEW",
-                            "ACTIVE",
-                            "PAUSED",
-                            "SOLD",
-                            "RENTED",
-                            "ARCHIVED",
-                          ] as ListingStatus[]
-                        ).map((s) => (
-                          <button
-                            key={s}
-                            onClick={() => handleStatusChange(l.id, s)}
-                            className="block w-full text-left px-3 py-2 text-xs hover:bg-primary/5 text-primary-dark"
-                          >
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                    <div className="relative flex-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          setOpenMenu(openMenu === l.id ? null : l.id)
+                        }
+                        disabled={updating[l.id]}
+                        className="w-full justify-between"
+                      >
+                        <span>{updating[l.id] ? "Saving…" : "Set status"}</span>
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      </Button>
+                      {openMenu === l.id && (
+                        <div className="absolute left-0 right-0 mt-1 z-50 glass-strong rounded-xl overflow-hidden shadow-xl">
+                          {(
+                            [
+                              "PENDING_REVIEW",
+                              "ACTIVE",
+                              "PAUSED",
+                              "SOLD",
+                              "RENTED",
+                              "ARCHIVED",
+                            ] as ListingStatus[]
+                          ).map((s) => (
+                            <button
+                              key={s}
+                              onClick={() => handleStatusChange(l.id, s)}
+                              className="block w-full text-left px-3 py-2 text-xs hover:bg-primary/5 text-primary-dark"
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </GlassCard>
             </motion.div>
           ))}
         </div>
+      )}
+
+      {editingListing && (
+        <EditListingModal
+          listing={editingListing}
+          onClose={() => setEditingListing(null)}
+          onSaved={(updated) =>
+            setItems((prev) =>
+              prev.map((l) => (l.id === updated.id ? updated : l)),
+            )
+          }
+        />
       )}
     </div>
   );

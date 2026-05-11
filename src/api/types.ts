@@ -93,6 +93,40 @@ export interface Listing {
   };
 }
 
+export interface FeaturedProperty {
+  id: string;
+  title: string;
+  location: string;
+  priceNaira: number;
+  priceLabel: string;
+  type: "SALE" | "RENT" | "SHORTLET";
+  propertyType: string;
+  beds: number;
+  baths: number;
+  sqft?: string | null;
+  imageUrls: string[];
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateFeaturedPropertyPayload {
+  title: string;
+  location: string;
+  priceNaira: number;
+  priceLabel: string;
+  type: "SALE" | "RENT" | "SHORTLET";
+  propertyType: string;
+  beds?: number;
+  baths?: number;
+  sqft?: string;
+  imageUrls: string[];
+  active?: boolean;
+}
+
+export type UpdateFeaturedPropertyPayload =
+  Partial<CreateFeaturedPropertyPayload>;
+
 export interface AppWaitlistEntry {
   id: string;
   email: string;

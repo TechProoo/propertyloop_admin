@@ -13,6 +13,7 @@ import Users from "@/pages/Users";
 import Waitlist from "@/pages/Waitlist";
 import AppWaitlist from "@/pages/AppWaitlist";
 import Messages from "@/pages/Messages";
+import FeaturedAds from "@/pages/FeaturedAds";
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="waitlist" element={<Waitlist />} />
             <Route path="app-waitlist" element={<AppWaitlist />} />
             <Route path="messages" element={<Messages />} />
+            <Route path="featured-ads" element={<FeaturedAds />} />
           </Route>
         </Routes>
       </AuthProvider>

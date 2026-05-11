@@ -8,10 +8,15 @@ import {
   Phone,
   Mail,
   MessageSquare,
+  CreditCard,
+  Crown,
+  Zap,
+  AlertTriangle,
+  X,
 } from "lucide-react";
 import { adminService } from "@/api/services";
 import messagesService from "@/api/messagesService";
-import type { User } from "@/api/types";
+import type { User, SubscriptionTier, SubscriptionStatus } from "@/api/types";
 import {
   Button,
   EmptyState,
@@ -37,7 +42,8 @@ export default function Agents() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<(typeof FILTERS)[number]["value"]>("ALL");
+  const [filter, setFilter] =
+    useState<(typeof FILTERS)[number]["value"]>("ALL");
 
   const handleMessage = async (id: string) => {
     setWorking((w) => ({ ...w, [id]: true }));
@@ -54,12 +60,60 @@ export default function Agents() {
   };
   const [working, setWorking] = useState<Record<string, boolean>>({});
 
+  // ── Subscription override modal ────────────────────────────────────────
+  const [overrideTarget, setOverrideTarget] = useState<User | null>(null);
+  const [overrideTier, setOverrideTier] = useState<string>("STANDARD");
+  const [overrideStatus, setOverrideStatus] = useState<string>("ACTIVE");
+  const [overrideSaving, setOverrideSaving] = useState(false);
+
+  const openOverride = (u: User) => {
+    setOverrideTarget(u);
+    setOverrideTier(u.agentProfile?.subscriptionTier ?? "STANDARD");
+    setOverrideStatus(u.agentProfile?.subscriptionStatus ?? "ACTIVE");
+  };
+
+  const saveOverride = async () => {
+    if (!overrideTarget) return;
+    setOverrideSaving(true);
+    try {
+      await adminService.overrideAgentSubscription(
+        overrideTarget.id,
+        overrideTier,
+        overrideStatus,
+      );
+      setItems((prev) =>
+        prev.map((u) =>
+          u.id === overrideTarget.id
+            ? {
+                ...u,
+                agentProfile: {
+                  ...u.agentProfile,
+                  verified: u.agentProfile?.verified ?? false,
+                  subscriptionTier: overrideTier as SubscriptionTier,
+                  subscriptionStatus: overrideStatus as SubscriptionStatus,
+                },
+              }
+            : u,
+        ),
+      );
+      setOverrideTarget(null);
+    } catch (e: any) {
+      alert(e?.response?.data?.message ?? "Failed to save override");
+    } finally {
+      setOverrideSaving(false);
+    }
+  };
+
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
       const verified =
-        filter === "VERIFIED" ? true : filter === "UNVERIFIED" ? false : undefined;
+        filter === "VERIFIED"
+          ? true
+          : filter === "UNVERIFIED"
+            ? false
+            : undefined;
       const res = await adminService.listAgents({
         limit: 100,
         verified,
@@ -113,7 +167,9 @@ export default function Agents() {
     try {
       const updated = await adminService.setUserActive(id, !isActive);
       setItems((prev) =>
-        prev.map((u) => (u.id === id ? { ...u, isActive: updated.isActive } : u)),
+        prev.map((u) =>
+          u.id === id ? { ...u, isActive: updated.isActive } : u,
+        ),
       );
     } finally {
       setWorking((w) => ({ ...w, [id]: false }));
@@ -126,7 +182,13 @@ export default function Agents() {
       <PageHeader
         title="Agents"
         subtitle="Review agent applications, verify and suspend accounts."
-        actions={<SearchInput value={search} onChange={setSearch} placeholder="Search agents…" />}
+        actions={
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Search agents…"
+          />
+        }
       />
 
       <div className="flex gap-2 mb-4">
@@ -150,7 +212,9 @@ export default function Agents() {
           <Spinner />
         </GlassCard>
       ) : error ? (
-        <GlassCard className="py-10 text-center text-red-600 text-sm">{error}</GlassCard>
+        <GlassCard className="py-10 text-center text-red-600 text-sm">
+          {error}
+        </GlassCard>
       ) : items.length === 0 ? (
         <GlassCard>
           <EmptyState
@@ -197,6 +261,34 @@ export default function Agents() {
                           <Pill variant="warn">Unverified</Pill>
                         )}
                         {suspended && <Pill variant="danger">Suspended</Pill>}
+                        {/* Subscription tier badge */}
+                        {u.agentProfile?.subscriptionTier === "FOUNDING" && (
+                          <Pill variant="warn">
+                            <Crown className="w-3 h-3" /> Founding
+                          </Pill>
+                        )}
+                        {u.agentProfile?.subscriptionTier === "PRO" && (
+                          <Pill variant="primary">
+                            <Zap className="w-3 h-3" /> Pro
+                          </Pill>
+                        )}
+                        {u.agentProfile?.subscriptionTier === "STANDARD" && (
+                          <Pill variant="info">
+                            <CreditCard className="w-3 h-3" /> Standard
+                          </Pill>
+                        )}
+                        {/* Subscription status badge (only for lapsed/grace) */}
+                        {u.agentProfile?.subscriptionStatus === "LAPSED" && (
+                          <Pill variant="danger">
+                            <AlertTriangle className="w-3 h-3" /> Lapsed
+                          </Pill>
+                        )}
+                        {u.agentProfile?.subscriptionStatus ===
+                          "GRACE_PERIOD" && (
+                          <Pill variant="warn">
+                            <AlertTriangle className="w-3 h-3" /> Grace Period
+                          </Pill>
+                        )}
                       </div>
                       {u.agentProfile?.agencyName && (
                         <p className="text-text-secondary text-xs truncate mt-0.5">
@@ -255,11 +347,97 @@ export default function Agents() {
                     >
                       <MessageSquare className="w-3.5 h-3.5" /> Message
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openOverride(u)}
+                      title="Override subscription"
+                    >
+                      <CreditCard className="w-3.5 h-3.5" /> Subscription
+                    </Button>
                   </div>
                 </GlassCard>
               </motion.div>
             );
           })}
+        </div>
+      )}
+
+      {/* ── Subscription override modal ── */}
+      {overrideTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md"
+          >
+            <div className="flex items-start justify-between mb-1">
+              <h4 className="font-heading font-bold text-primary-dark text-lg">
+                Override Subscription
+              </h4>
+              <button
+                onClick={() => setOverrideTarget(null)}
+                className="w-8 h-8 rounded-full text-text-secondary hover:bg-gray-100 flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-text-secondary text-sm mb-6">
+              {overrideTarget.name} · {overrideTarget.email}
+            </p>
+
+            <div className="flex flex-col gap-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-primary-dark mb-1.5">
+                  Subscription Tier
+                </label>
+                <select
+                  value={overrideTier}
+                  onChange={(e) => setOverrideTier(e.target.value)}
+                  className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-primary-dark bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value="FOUNDING">Founding — free forever</option>
+                  <option value="STANDARD">Standard — ₦5,000/mo</option>
+                  <option value="PRO">Pro — ₦12,000/mo</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-primary-dark mb-1.5">
+                  Subscription Status
+                </label>
+                <select
+                  value={overrideStatus}
+                  onChange={(e) => setOverrideStatus(e.target.value)}
+                  className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-primary-dark bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value="ACTIVE">Active</option>
+                  <option value="GRACE_PERIOD">Grace Period</option>
+                  <option value="LAPSED">Lapsed</option>
+                  <option value="CANCELLED">Cancelled</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setOverrideTarget(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                className="flex-1"
+                disabled={overrideSaving}
+                onClick={saveOverride}
+              >
+                {overrideSaving ? "Saving…" : "Save override"}
+              </Button>
+            </div>
+          </motion.div>
         </div>
       )}
     </div>

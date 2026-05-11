@@ -176,9 +176,7 @@ export default function EditListingModal({ listing, onClose, onSaved }: Props) {
               <select
                 className={inputCls}
                 value={form.status ?? "ACTIVE"}
-                onChange={(e) =>
-                  set("status", e.target.value as ListingStatus)
-                }
+                onChange={(e) => set("status", e.target.value as ListingStatus)}
               >
                 {STATUSES.map((s) => (
                   <option key={s} value={s}>
@@ -207,9 +205,7 @@ export default function EditListingModal({ listing, onClose, onSaved }: Props) {
                 type="number"
                 className={inputCls}
                 value={form.priceNaira ?? ""}
-                onChange={(e) =>
-                  set("priceNaira", Number(e.target.value) || 0)
-                }
+                onChange={(e) => set("priceNaira", Number(e.target.value) || 0)}
                 min={0}
                 required
               />
@@ -348,9 +344,7 @@ export default function EditListingModal({ listing, onClose, onSaved }: Props) {
             </Field>
           </div>
 
-          {error && (
-            <p className="text-red-600 text-xs font-medium">{error}</p>
-          )}
+          {error && <p className="text-red-600 text-xs font-medium">{error}</p>}
         </form>
 
         {/* Footer */}
