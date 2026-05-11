@@ -12,6 +12,27 @@ import type {
   WaitlistEntry,
 } from "./types";
 
+export type UpdateListingPayload = {
+  title?: string;
+  type?: "SALE" | "RENT" | "SHORTLET";
+  propertyType?: string;
+  priceNaira?: number;
+  period?: string;
+  address?: string;
+  location?: string;
+  beds?: number;
+  baths?: number;
+  sqft?: string;
+  yearBuilt?: string;
+  description?: string;
+  features?: string[];
+  coverImage?: string;
+  images?: string[];
+  virtualTourUrl?: string;
+  videoUrl?: string;
+  status?: ListingStatus;
+};
+
 // ─── Auth ────────────────────────────────────────────────────────────────
 
 export const authService = {
@@ -73,6 +94,10 @@ export const adminService = {
     });
     return data;
   },
+  async updateListing(id: string, payload: UpdateListingPayload) {
+    const { data } = await api.patch<Listing>(`/admin/listings/${id}`, payload);
+    return data;
+  },
 
   // Agents
   async listAgents(params: {
@@ -81,12 +106,25 @@ export const adminService = {
     search?: string;
     verified?: boolean;
   }) {
-    const { data } = await api.get<Paginated<User>>("/admin/agents", { params });
+    const { data } = await api.get<Paginated<User>>("/admin/agents", {
+      params,
+    });
     return data;
   },
   async setAgentVerified(id: string, verified: boolean) {
     const { data } = await api.patch(`/admin/agents/${id}/verified`, {
       verified,
+    });
+    return data;
+  },
+  async overrideAgentSubscription(
+    agentId: string,
+    tier: string,
+    status: string,
+  ) {
+    const { data } = await api.patch(`/admin/agents/${agentId}/subscription`, {
+      tier,
+      status,
     });
     return data;
   },
@@ -98,7 +136,9 @@ export const adminService = {
     search?: string;
     verified?: boolean;
   }) {
-    const { data } = await api.get<Paginated<User>>("/admin/vendors", { params });
+    const { data } = await api.get<Paginated<User>>("/admin/vendors", {
+      params,
+    });
     return data;
   },
   async setVendorVerified(id: string, verified: boolean) {
@@ -122,10 +162,9 @@ export const adminService = {
     return data;
   },
   async setViewingStatus(id: string, status: ViewingStatus) {
-    const { data } = await api.patch<Viewing>(
-      `/admin/viewings/${id}/status`,
-      { status },
-    );
+    const { data } = await api.patch<Viewing>(`/admin/viewings/${id}/status`, {
+      status,
+    });
     return data;
   },
   async deleteViewing(id: string) {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Home, ChevronDown, MapPin, Bed, Bath } from "lucide-react";
+import { Home, ChevronDown, MapPin, Bed, Bath, Pencil } from "lucide-react";
 import { adminService } from "@/api/services";
 import type { Listing, ListingStatus } from "@/api/types";
 import {
@@ -12,6 +12,7 @@ import {
   SearchInput,
   Spinner,
 } from "@/components/ui";
+import EditListingModal from "@/components/EditListingModal";
 import { usePageTitle } from "@/lib/usePageTitle";
 import { actionLoader } from "@/lib/actionLoader";
 
@@ -51,6 +52,7 @@ export default function Listings() {
   const [filter, setFilter] = useState<"ALL" | ListingStatus>("ALL");
   const [updating, setUpdating] = useState<Record<string, boolean>>({});
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [editingListing, setEditingListing] = useState<Listing | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -104,6 +106,17 @@ export default function Listings() {
 
   return (
     <div>
+      {editingListing && (
+        <EditListingModal
+          listing={editingListing}
+          onClose={() => setEditingListing(null)}
+          onSaved={(updated) =>
+            setItems((prev) =>
+              prev.map((l) => (l.id === updated.id ? updated : l)),
+            )
+          }
+        />
+      )}
       <PageHeader
         title="Listings"
         subtitle="Review, approve and moderate property listings."
@@ -200,8 +213,18 @@ export default function Listings() {
                     </p>
                   )}
 
-                  {/* Status changer */}
-                  <div className="relative mt-3">
+                  {/* Edit + Status changer */}
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setEditingListing(l)}
+                      className="flex-none"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                      Edit
+                    </Button>
+                  <div className="relative flex-1">
                     <Button
                       size="sm"
                       variant="outline"
@@ -234,6 +257,7 @@ export default function Listings() {
                         ))}
                       </div>
                     )}
+                  </div>
                   </div>
                 </div>
               </GlassCard>

@@ -13,6 +13,13 @@ export interface User {
   vendorProfile?: VendorProfile | null;
 }
 
+export type SubscriptionTier = "FOUNDING" | "STANDARD" | "PRO";
+export type SubscriptionStatus =
+  | "ACTIVE"
+  | "GRACE_PERIOD"
+  | "LAPSED"
+  | "CANCELLED";
+
 export interface AgentProfile {
   id?: string;
   userId?: string;
@@ -24,6 +31,9 @@ export interface AgentProfile {
   listingsCount?: number;
   soldRentedCount?: number;
   verified: boolean;
+  subscriptionTier?: SubscriptionTier | null;
+  subscriptionStatus?: SubscriptionStatus | null;
+  subscriptionRenewsAt?: string | null;
 }
 
 export interface VendorProfile {
@@ -55,6 +65,7 @@ export interface Listing {
   propertyType: string;
   priceNaira: number;
   priceLabel: string;
+  period?: string | null;
   address: string;
   location: string;
   beds: number;
@@ -65,6 +76,8 @@ export interface Listing {
   features?: string[];
   coverImage?: string;
   images?: string[];
+  virtualTourUrl?: string | null;
+  videoUrl?: string | null;
   rating?: number;
   verified?: boolean;
   status: ListingStatus;
