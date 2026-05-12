@@ -81,7 +81,6 @@ export default function FeaturedAds() {
   const [uploading, setUploading] = useState(false);
   const [videoUploading, setVideoUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
   const multiVideoInputRef = useRef<HTMLInputElement>(null);
 
   // Delete confirm
