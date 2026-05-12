@@ -59,7 +59,7 @@ const EMPTY_FORM: Omit<CreateFeaturedPropertyPayload, "priceNaira"> & {
   baths: 0,
   sqft: "",
   imageUrls: [],
-  videoUrl: undefined,
+  videoUrls: [],
   description: "",
   displayOrder: 0,
   active: true,
@@ -82,6 +82,7 @@ export default function FeaturedAds() {
   const [videoUploading, setVideoUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const multiVideoInputRef = useRef<HTMLInputElement>(null);
 
   // Delete confirm
   const [deleteTarget, setDeleteTarget] = useState<FeaturedProperty | null>(
@@ -128,7 +129,11 @@ export default function FeaturedAds() {
       baths: p.baths,
       sqft: p.sqft ?? "",
       imageUrls: p.imageUrls ?? [],
-      videoUrl: p.videoUrl ?? undefined,
+      videoUrls: p.videoUrls?.length
+        ? p.videoUrls
+        : p.videoUrl
+          ? [p.videoUrl]
+          : [],
       description: p.description ?? "",
       displayOrder: p.displayOrder ?? 0,
       active: p.active,
@@ -163,7 +168,7 @@ export default function FeaturedAds() {
     setFormError(null);
     try {
       const url = await uploadService.uploadFeaturedPropertyVideo(file);
-      setForm((f) => ({ ...f, videoUrl: url }));
+      setForm((f) => ({ ...f, videoUrls: [...(f.videoUrls ?? []), url] }));
     } catch (e: any) {
       setFormError(e?.response?.data?.message ?? "Video upload failed.");
     } finally {
@@ -206,7 +211,7 @@ export default function FeaturedAds() {
         baths: Number(form.baths),
         sqft: form.sqft.trim() || undefined,
         imageUrls: form.imageUrls,
-        videoUrl: form.videoUrl || undefined,
+        videoUrls: form.videoUrls ?? [],
         description: form.description || undefined,
         displayOrder: Number(form.displayOrder) || 0,
         active: form.active,
@@ -348,9 +353,10 @@ export default function FeaturedAds() {
                 <span className="absolute top-8 left-2 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#2f9e61]/90 text-white">
                   #{p.displayOrder + 1}
                 </span>
-                {p.videoUrl && (
+                {((p.videoUrls?.length ?? 0) > 0 || p.videoUrl) && (
                   <span className="absolute bottom-2 left-2 flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-black/60 text-white">
-                    <Video className="w-3 h-3" /> Video
+                    <Video className="w-3 h-3" />
+                    {(p.videoUrls?.length ?? 0) > 1 ? `${p.videoUrls!.length} videos` : "Video"}
                   </span>
                 )}
               </div>
@@ -546,76 +552,98 @@ export default function FeaturedAds() {
               {/* Video upload */}
               <div>
                 <label className="block text-xs font-medium text-text-secondary mb-1">
-                  Property Video{" "}
-                  <span className="text-text-subtle">(optional)</span>
+                  Property Videos{" "}
+                  <span className="text-text-subtle">(optional — multiple allowed)</span>
                 </label>
 
                 <input
-                  ref={videoInputRef}
+                  ref={multiVideoInputRef}
                   type="file"
                   accept="video/*"
+                  multiple
                   className="hidden"
                   onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleVideoFile(file);
+                    const files = Array.from(e.target.files ?? []);
+                    files.forEach((file) => handleVideoFile(file));
                     e.target.value = "";
                   }}
                 />
 
-                {form.videoUrl ? (
-                  <div className="relative rounded-xl overflow-hidden border border-border-light bg-black/5">
-                    <video
-                      src={form.videoUrl}
-                      controls
-                      className="w-full max-h-48 object-contain"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setForm((f) => ({ ...f, videoUrl: undefined }))}
-                      className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-500 transition-colors"
-                      title="Remove video"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => !videoUploading && videoInputRef.current?.click()}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      const file = e.dataTransfer.files?.[0];
-                      if (file) handleVideoFile(file);
-                    }}
-                    className={`relative rounded-xl border-2 border-dashed transition-colors cursor-pointer overflow-hidden ${
-                      videoUploading
-                        ? "border-primary/40 bg-primary/5 cursor-wait"
-                        : "border-border-light hover:border-primary/50 bg-white/40"
-                    }`}
-                  >
-                    <div className="flex flex-col items-center justify-center py-6 gap-2">
-                      {videoUploading ? (
-                        <>
-                          <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                          <span className="text-xs text-text-secondary">
-                            Uploading video…
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <Video className="w-5 h-5 text-text-subtle" />
-                          <span className="text-xs text-text-secondary text-center">
-                            Click or drag & drop to upload
-                            <br />
-                            <span className="text-text-subtle">
-                              MP4, MOV, WEBM up to 200 MB
-                            </span>
-                          </span>
-                        </>
-                      )}
-                    </div>
+                {/* Uploaded videos list */}
+                {(form.videoUrls ?? []).length > 0 && (
+                  <div className="flex flex-col gap-2 mb-2">
+                    {(form.videoUrls ?? []).map((url, idx) => (
+                      <div
+                        key={url}
+                        className="relative rounded-xl overflow-hidden border border-border-light bg-black/5"
+                      >
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/70 border-b border-border-light text-[11px] text-text-secondary font-medium">
+                          <Video className="w-3 h-3" /> Video {idx + 1}
+                        </div>
+                        <video
+                          src={url}
+                          controls
+                          className="w-full max-h-40 object-contain"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm((f) => ({
+                              ...f,
+                              videoUrls: (f.videoUrls ?? []).filter(
+                                (_, i) => i !== idx,
+                              ),
+                            }))
+                          }
+                          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-500 transition-colors"
+                          title="Remove video"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
+
+                {/* Drop zone */}
+                <div
+                  onClick={() => !videoUploading && multiVideoInputRef.current?.click()}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const files = Array.from(e.dataTransfer.files);
+                    files.forEach((file) => handleVideoFile(file));
+                  }}
+                  className={`relative rounded-xl border-2 border-dashed transition-colors cursor-pointer overflow-hidden ${
+                    videoUploading
+                      ? "border-primary/40 bg-primary/5 cursor-wait"
+                      : "border-border-light hover:border-primary/50 bg-white/40"
+                  }`}
+                >
+                  <div className="flex flex-col items-center justify-center py-6 gap-2">
+                    {videoUploading ? (
+                      <>
+                        <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                        <span className="text-xs text-text-secondary">
+                          Uploading video…
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Video className="w-5 h-5 text-text-subtle" />
+                        <span className="text-xs text-text-secondary text-center">
+                          {(form.videoUrls ?? []).length > 0
+                            ? "Add another video"
+                            : "Click or drag & drop to upload"}
+                          <br />
+                          <span className="text-text-subtle">
+                            MP4, MOV, WEBM up to 200 MB
+                          </span>
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Title */}
