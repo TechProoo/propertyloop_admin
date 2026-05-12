@@ -263,12 +263,16 @@ export default function FeaturedAds() {
       )}
 
       {!loading && !error && items.length === 0 && (
-        <EmptyState
-          icon={<Star className="w-10 h-10 text-text-secondary" />}
-          title="No featured properties"
-          description="Add a property to start featuring it on the hero gallery."
-          action={<Button onClick={openAdd}>Add your first property</Button>}
-        />
+        <>
+          <EmptyState
+            icon={<Star className="w-10 h-10 text-text-secondary" />}
+            title="No featured properties"
+            message="Add a property to start featuring it on the hero gallery."
+          />
+          <div className="flex justify-center mt-4">
+            <Button onClick={openAdd}>Add your first property</Button>
+          </div>
+        </>
       )}
 
       {!loading && !error && items.length > 0 && (
