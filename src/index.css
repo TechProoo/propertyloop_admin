@@ -108,6 +108,55 @@ body {
   display: none;
 }
 
+/* ─── Rich text editor (Quill via react-quill-new) ─── */
+.pl-rte .ql-toolbar {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(31, 111, 67, 0.15);
+  backdrop-filter: blur(8px);
+}
+.pl-rte .ql-container {
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(31, 111, 67, 0.15);
+  font-size: 0.875rem;
+}
+.pl-rte .ql-editor {
+  min-height: 140px;
+  color: #1a3d2a;
+}
+.pl-rte .ql-editor.ql-blank::before {
+  color: rgba(31, 111, 67, 0.45);
+  font-style: normal;
+}
+.pl-rte:focus-within .ql-toolbar,
+.pl-rte:focus-within .ql-container {
+  border-color: #1f6f43;
+}
+.pl-rte .ql-toolbar .ql-stroke {
+  stroke: #4a7a5c;
+}
+.pl-rte .ql-toolbar .ql-fill {
+  fill: #4a7a5c;
+}
+.pl-rte .ql-toolbar button:hover .ql-stroke,
+.pl-rte .ql-toolbar button.ql-active .ql-stroke {
+  stroke: #1f6f43;
+}
+.pl-rte .ql-toolbar button:hover .ql-fill,
+.pl-rte .ql-toolbar button.ql-active .ql-fill {
+  fill: #1f6f43;
+}
+.pl-rte .ql-toolbar .ql-picker-label {
+  color: #4a7a5c;
+}
+.pl-rte .ql-toolbar .ql-picker-label:hover,
+.pl-rte .ql-toolbar .ql-picker-item:hover {
+  color: #1f6f43;
+}
+
 /* Bouncing-ball loader (used in <ActionOverlay /> and inline) */
 @keyframes ball-bounce {
   0%,

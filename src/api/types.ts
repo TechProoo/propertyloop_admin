@@ -104,7 +104,9 @@ export interface FeaturedProperty {
   beds: number;
   baths: number;
   sqft?: string | null;
+  description?: string | null;
   imageUrls: string[];
+  videoUrl?: string | null;
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -120,7 +122,9 @@ export interface CreateFeaturedPropertyPayload {
   beds?: number;
   baths?: number;
   sqft?: string;
+  description?: string;
   imageUrls: string[];
+  videoUrl?: string;
   active?: boolean;
 }
 

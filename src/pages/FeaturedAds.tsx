@@ -8,8 +8,11 @@ import {
   Star,
   ImageOff,
   Upload,
+  Video,
+  X,
 } from "lucide-react";
 import { adminService, uploadService } from "@/api/services";
+import RichTextEditor from "@/components/ui/RichTextEditor";
 import type {
   FeaturedProperty,
   CreateFeaturedPropertyPayload,
@@ -56,6 +59,8 @@ const EMPTY_FORM: Omit<CreateFeaturedPropertyPayload, "priceNaira"> & {
   baths: 0,
   sqft: "",
   imageUrls: [],
+  videoUrl: undefined,
+  description: "",
   active: true,
 };
 
@@ -73,7 +78,9 @@ export default function FeaturedAds() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [videoUploading, setVideoUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   // Delete confirm
   const [deleteTarget, setDeleteTarget] = useState<FeaturedProperty | null>(
@@ -120,6 +127,8 @@ export default function FeaturedAds() {
       baths: p.baths,
       sqft: p.sqft ?? "",
       imageUrls: p.imageUrls ?? [],
+      videoUrl: p.videoUrl ?? undefined,
+      description: p.description ?? "",
       active: p.active,
     });
     setFormError(null);
@@ -143,8 +152,25 @@ export default function FeaturedAds() {
     }
   };
 
+  const handleVideoFile = async (file: File) => {
+    if (!file.type.startsWith("video/")) {
+      setFormError("Please select a video file.");
+      return;
+    }
+    setVideoUploading(true);
+    setFormError(null);
+    try {
+      const url = await uploadService.uploadFeaturedPropertyVideo(file);
+      setForm((f) => ({ ...f, videoUrl: url }));
+    } catch (e: any) {
+      setFormError(e?.response?.data?.message ?? "Video upload failed.");
+    } finally {
+      setVideoUploading(false);
+    }
+  };
+
   const handleSave = async () => {
-    if (uploading) return;
+    if (uploading || videoUploading) return;
     if (
       !form.title.trim() ||
       !form.location.trim() ||
@@ -178,6 +204,8 @@ export default function FeaturedAds() {
         baths: Number(form.baths),
         sqft: form.sqft.trim() || undefined,
         imageUrls: form.imageUrls,
+        videoUrl: form.videoUrl || undefined,
+        description: form.description || undefined,
         active: form.active,
       };
 
@@ -314,6 +342,11 @@ export default function FeaturedAds() {
                 <span className="absolute top-2 left-2 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-black/60 text-white">
                   {p.type}
                 </span>
+                {p.videoUrl && (
+                  <span className="absolute bottom-2 left-2 flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-black/60 text-white">
+                    <Video className="w-3 h-3" /> Video
+                  </span>
+                )}
               </div>
 
               {/* Content */}
@@ -504,6 +537,81 @@ export default function FeaturedAds() {
                 </div>
               </div>
 
+              {/* Video upload */}
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1">
+                  Property Video{" "}
+                  <span className="text-text-subtle">(optional)</span>
+                </label>
+
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleVideoFile(file);
+                    e.target.value = "";
+                  }}
+                />
+
+                {form.videoUrl ? (
+                  <div className="relative rounded-xl overflow-hidden border border-border-light bg-black/5">
+                    <video
+                      src={form.videoUrl}
+                      controls
+                      className="w-full max-h-48 object-contain"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, videoUrl: undefined }))}
+                      className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-500 transition-colors"
+                      title="Remove video"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => !videoUploading && videoInputRef.current?.click()}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) handleVideoFile(file);
+                    }}
+                    className={`relative rounded-xl border-2 border-dashed transition-colors cursor-pointer overflow-hidden ${
+                      videoUploading
+                        ? "border-primary/40 bg-primary/5 cursor-wait"
+                        : "border-border-light hover:border-primary/50 bg-white/40"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center justify-center py-6 gap-2">
+                      {videoUploading ? (
+                        <>
+                          <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                          <span className="text-xs text-text-secondary">
+                            Uploading video…
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Video className="w-5 h-5 text-text-subtle" />
+                          <span className="text-xs text-text-secondary text-center">
+                            Click or drag & drop to upload
+                            <br />
+                            <span className="text-text-subtle">
+                              MP4, MOV, WEBM up to 200 MB
+                            </span>
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Title */}
               <div>
                 <label className="block text-xs font-medium text-text-secondary mb-1">
@@ -651,6 +759,21 @@ export default function FeaturedAds() {
                 </div>
               </div>
 
+              {/* Description */}
+              <div>
+                <label className="block text-xs font-medium text-text-secondary mb-1">
+                  Description{" "}
+                  <span className="text-text-subtle">(optional)</span>
+                </label>
+                <RichTextEditor
+                  value={form.description ?? ""}
+                  onChange={(html) =>
+                    setForm((f) => ({ ...f, description: html }))
+                  }
+                  placeholder="Describe the property — highlights, features, neighbourhood…"
+                />
+              </div>
+
               {/* Active toggle */}
               <div className="flex items-center gap-3">
                 <button
@@ -682,8 +805,11 @@ export default function FeaturedAds() {
               >
                 Cancel
               </button>
-              <Button onClick={handleSave} disabled={saving || uploading}>
-                {uploading
+              <Button
+                onClick={handleSave}
+                disabled={saving || uploading || videoUploading}
+              >
+                {uploading || videoUploading
                   ? "Uploading…"
                   : saving
                     ? "Saving…"
