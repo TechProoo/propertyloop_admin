@@ -14,6 +14,7 @@ import Waitlist from "@/pages/Waitlist";
 import AppWaitlist from "@/pages/AppWaitlist";
 import Messages from "@/pages/Messages";
 import FeaturedAds from "@/pages/FeaturedAds";
+import Disputes from "@/pages/Disputes";
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
             <Route path="app-waitlist" element={<AppWaitlist />} />
             <Route path="messages" element={<Messages />} />
             <Route path="featured-ads" element={<FeaturedAds />} />
+            <Route path="disputes" element={<Disputes />} />
           </Route>
         </Routes>
       </AuthProvider>

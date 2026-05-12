@@ -24,6 +24,7 @@ export interface ChatMessage {
   senderAvatar: string | null;
   isYou: boolean;
   text: string;
+  attachmentUrls: string[];
   createdAt: string;
 }
 
@@ -50,10 +51,21 @@ const messagesService = {
     return data;
   },
 
-  async sendMessage(conversationId: string, text: string) {
+  async sendMessage(conversationId: string, text: string, attachmentUrls?: string[]) {
     const { data } = await api.post<ChatMessage>(
       `/messages/conversations/${conversationId}`,
-      { text },
+      { text, ...(attachmentUrls?.length ? { attachmentUrls } : {}) },
+    );
+    return data;
+  },
+
+  async uploadAttachment(file: File): Promise<{ url: string; mimeType: string }> {
+    const form = new FormData();
+    form.append("file", file);
+    const { data } = await api.post<{ url: string; mimeType: string }>(
+      "/upload/message-attachment",
+      form,
+      { headers: { "Content-Type": "multipart/form-data" } },
     );
     return data;
   },

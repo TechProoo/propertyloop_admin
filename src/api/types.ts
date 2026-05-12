@@ -161,6 +161,22 @@ export interface WaitlistEntry {
   created_at: string;
 }
 
+export type ReportTargetType = "AGENT" | "VENDOR" | "LISTING";
+export type ReportStatus = "PENDING" | "REVIEWED" | "RESOLVED" | "DISMISSED";
+
+export interface Report {
+  id: string;
+  targetType: ReportTargetType;
+  targetId: string;
+  reason: string;
+  status: ReportStatus;
+  adminNote?: string | null;
+  reporterId?: string | null;
+  reporter?: { id: string; name: string; email: string; role: string } | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Paginated<T> {
   items: T[];
   total: number;

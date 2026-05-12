@@ -8,6 +8,9 @@ import type {
   Listing,
   ListingStatus,
   Paginated,
+  Report,
+  ReportStatus,
+  ReportTargetType,
   UpdateFeaturedPropertyPayload,
   User,
   Viewing,
@@ -232,6 +235,27 @@ export const adminService = {
     const { data } = await api.delete<{ success: boolean }>(
       `/admin/featured-properties/${id}`,
     );
+    return data;
+  },
+};
+
+// ─── Reports (user-submitted agent/vendor/listing reports) ───────────────
+
+export const reportsService = {
+  async list(params: {
+    page?: number;
+    limit?: number;
+    status?: ReportStatus;
+    targetType?: ReportTargetType;
+  }): Promise<Paginated<Report>> {
+    const { data } = await api.get<Paginated<Report>>("/reports", { params });
+    return data;
+  },
+  async update(
+    id: string,
+    payload: { status?: ReportStatus; adminNote?: string },
+  ): Promise<Report> {
+    const { data } = await api.patch<Report>(`/reports/${id}`, payload);
     return data;
   },
 };

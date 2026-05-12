@@ -3,11 +3,16 @@ import { useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   CheckCheck,
+  FileText,
+  Image as ImageIcon,
   MessageCircle,
+  Paperclip,
   Send,
+  X,
 } from "lucide-react";
 import { useChat } from "@/lib/useChat";
 import { usePageTitle } from "@/lib/usePageTitle";
+import messagesService from "@/api/messagesService";
 import {
   EmptyState,
   GlassCard,
@@ -29,6 +34,46 @@ function relativeTime(iso: string): string {
   return new Date(iso).toLocaleDateString();
 }
 
+function isImageUrl(url: string) {
+  return /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(url);
+}
+
+function AttachmentBubble({ urls, isYou }: { urls: string[]; isYou: boolean }) {
+  if (!urls?.length) return null;
+  return (
+    <div className="flex flex-wrap gap-1.5 mt-1.5">
+      {urls.map((url, i) =>
+        isImageUrl(url) ? (
+          <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+            <img
+              src={url}
+              alt="attachment"
+              className="max-w-[180px] max-h-[180px] rounded-xl object-cover border border-white/20 hover:opacity-90 transition-opacity"
+            />
+          </a>
+        ) : (
+          <a
+            key={i}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors ${
+              isYou
+                ? "bg-white/20 border-white/30 text-white hover:bg-white/30"
+                : "bg-white/60 border-border-light text-primary-dark hover:bg-white/90"
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate max-w-[120px]">
+              {url.split("/").pop()?.split("?")[0] || "Attachment"}
+            </span>
+          </a>
+        ),
+      )}
+    </div>
+  );
+}
+
 export default function Messages() {
   usePageTitle("Messages");
   const [searchParams, setSearchParams] = useSearchParams();
@@ -37,15 +82,18 @@ export default function Messages() {
   const [search, setSearch] = useState("");
   const [mobileShowChat, setMobileShowChat] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-open ?with=convoId
+  // Attachment state
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+
   useEffect(() => {
     if (chat.loading) return;
     const id = searchParams.get("with");
     if (id && chat.conversations.some((c) => c.id === id)) {
       chat.openConversation(id);
       setMobileShowChat(true);
-      // strip the param so a refresh doesn't keep re-opening
       const next = new URLSearchParams(searchParams);
       next.delete("with");
       setSearchParams(next, { replace: true });
@@ -70,11 +118,41 @@ export default function Messages() {
     (c) => c.id === chat.activeConversationId,
   );
 
-  const handleSend = () => {
-    const text = draft.trim();
-    if (!text) return;
-    chat.sendMessage(text);
+  const canSend = (draft.trim().length > 0 || pendingFiles.length > 0) && !uploading;
+
+  const handleSend = async () => {
+    if (!canSend) return;
+
+    let attachmentUrls: string[] = [];
+
+    if (pendingFiles.length > 0) {
+      setUploading(true);
+      try {
+        const results = await Promise.all(
+          pendingFiles.map((f) => messagesService.uploadAttachment(f)),
+        );
+        attachmentUrls = results.map((r) => r.url);
+      } catch {
+        setUploading(false);
+        return;
+      }
+      setUploading(false);
+    }
+
+    chat.sendMessage(draft.trim(), attachmentUrls);
     setDraft("");
+    setPendingFiles([]);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setPendingFiles((prev) => [...prev, ...files].slice(0, 5));
+    e.target.value = "";
+  };
+
+  const removePending = (idx: number) => {
+    setPendingFiles((prev) => prev.filter((_, i) => i !== idx));
   };
 
   return (
@@ -247,9 +325,12 @@ export default function Messages() {
                             : "bg-white/70 border border-border-light text-primary-dark rounded-bl-sm"
                         }`}
                       >
-                        <p className="leading-snug whitespace-pre-wrap break-words">
-                          {m.text}
-                        </p>
+                        {m.text && (
+                          <p className="leading-snug whitespace-pre-wrap break-words">
+                            {m.text}
+                          </p>
+                        )}
+                        <AttachmentBubble urls={m.attachmentUrls ?? []} isYou={m.isYou} />
                         <p
                           className={`text-[10px] mt-1 flex items-center gap-1 ${
                             m.isYou ? "text-white/70" : "text-text-subtle"
@@ -268,7 +349,48 @@ export default function Messages() {
                 <div ref={endRef} />
               </div>
 
+              {/* Pending file previews */}
+              {pendingFiles.length > 0 && (
+                <div className="px-4 pt-2 pb-1 border-t border-border-light flex flex-wrap gap-2">
+                  {pendingFiles.map((f, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-1.5 bg-white/60 border border-border-light rounded-lg px-2.5 py-1.5 text-xs text-primary-dark"
+                    >
+                      {f.type.startsWith("image/") ? (
+                        <ImageIcon className="w-3.5 h-3.5 text-primary shrink-0" />
+                      ) : (
+                        <FileText className="w-3.5 h-3.5 text-primary shrink-0" />
+                      )}
+                      <span className="max-w-[100px] truncate">{f.name}</span>
+                      <button
+                        onClick={() => removePending(i)}
+                        className="ml-0.5 text-text-subtle hover:text-red-500 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Composer */}
               <div className="px-4 py-3 border-t border-border-light flex items-end gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  accept="image/*,application/pdf"
+                  multiple
+                  onChange={handleFileChange}
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="shrink-0 w-9 h-9 rounded-full hover:bg-white/60 flex items-center justify-center text-text-subtle hover:text-primary transition-colors"
+                  title="Attach file"
+                >
+                  <Paperclip className="w-4 h-4" />
+                </button>
                 <textarea
                   value={draft}
                   onChange={(e) => {
@@ -281,16 +403,24 @@ export default function Messages() {
                       handleSend();
                     }
                   }}
-                  placeholder="Type a message…"
+                  placeholder={
+                    pendingFiles.length > 0
+                      ? "Add a message (optional)…"
+                      : "Type a message…"
+                  }
                   rows={1}
                   className="flex-1 resize-none rounded-2xl bg-white/60 border border-border-light px-4 py-2.5 text-sm text-primary-dark placeholder:text-text-subtle focus:outline-none focus:border-primary focus:bg-white max-h-32"
                 />
                 <button
                   onClick={handleSend}
-                  disabled={!draft.trim()}
+                  disabled={!canSend}
                   className="shrink-0 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  <Send className="w-4 h-4" />
+                  {uploading ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </>

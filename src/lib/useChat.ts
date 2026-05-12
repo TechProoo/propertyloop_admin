@@ -15,7 +15,7 @@ export interface UseChatReturn {
   messagesLoading: boolean;
   activeConversationId: string | null;
   openConversation: (id: string) => void;
-  sendMessage: (text: string) => void;
+  sendMessage: (text: string, attachmentUrls?: string[]) => void;
   setTyping: (isTyping: boolean) => void;
   otherTyping: boolean;
 }
@@ -151,11 +151,13 @@ export function useChat(): UseChatReturn {
   }, []);
 
   const sendMessage = useCallback(
-    (text: string) => {
-      if (!text.trim() || !activeConversationId) return;
+    (text: string, attachmentUrls?: string[]) => {
+      if (!text.trim() && !attachmentUrls?.length) return;
+      if (!activeConversationId) return;
       socketRef.current?.emit("send_message", {
         conversationId: activeConversationId,
         text: text.trim(),
+        ...(attachmentUrls?.length ? { attachmentUrls } : {}),
       });
       socketRef.current?.emit("typing", {
         conversationId: activeConversationId,

@@ -15,6 +15,7 @@ import {
   Smartphone,
   MessageSquare,
   Star,
+  AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/cn";
@@ -30,6 +31,7 @@ const navItems = [
   { to: "/waitlist", label: "Waitlist", icon: ListChecks },
   { to: "/app-waitlist", label: "App Waitlist", icon: Smartphone },
   { to: "/featured-ads", label: "Featured Ads", icon: Star },
+  { to: "/disputes", label: "Disputes", icon: AlertTriangle },
 ];
 
 export default function AdminLayout() {
