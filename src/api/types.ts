@@ -107,6 +107,7 @@ export interface FeaturedProperty {
   description?: string | null;
   imageUrls: string[];
   videoUrl?: string | null;
+  displayOrder: number;
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -125,6 +126,7 @@ export interface CreateFeaturedPropertyPayload {
   description?: string;
   imageUrls: string[];
   videoUrl?: string;
+  displayOrder?: number;
   active?: boolean;
 }
 

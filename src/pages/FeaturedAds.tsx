@@ -61,6 +61,7 @@ const EMPTY_FORM: Omit<CreateFeaturedPropertyPayload, "priceNaira"> & {
   imageUrls: [],
   videoUrl: undefined,
   description: "",
+  displayOrder: 0,
   active: true,
 };
 
@@ -129,6 +130,7 @@ export default function FeaturedAds() {
       imageUrls: p.imageUrls ?? [],
       videoUrl: p.videoUrl ?? undefined,
       description: p.description ?? "",
+      displayOrder: p.displayOrder ?? 0,
       active: p.active,
     });
     setFormError(null);
@@ -206,6 +208,7 @@ export default function FeaturedAds() {
         imageUrls: form.imageUrls,
         videoUrl: form.videoUrl || undefined,
         description: form.description || undefined,
+        displayOrder: Number(form.displayOrder) || 0,
         active: form.active,
       };
 
@@ -341,6 +344,9 @@ export default function FeaturedAds() {
                 {/* Type badge */}
                 <span className="absolute top-2 left-2 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-black/60 text-white">
                   {p.type}
+                </span>
+                <span className="absolute top-8 left-2 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#2f9e61]/90 text-white">
+                  #{p.displayOrder + 1}
                 </span>
                 {p.videoUrl && (
                   <span className="absolute bottom-2 left-2 flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-black/60 text-white">
@@ -774,7 +780,31 @@ export default function FeaturedAds() {
                 />
               </div>
 
-              {/* Active toggle */}
+              {/* Display order + Active toggle */}
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-text-secondary">
+                    Display Order
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.displayOrder}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        displayOrder: Number(e.target.value),
+                      }))
+                    }
+                    className="w-20 h-9 px-3 rounded-xl bg-white/70 border border-border-light text-sm text-primary-dark text-center focus:outline-none focus:border-primary transition-colors"
+                  />
+                  <span className="text-[10px] text-text-subtle">
+                    0 = first
+                  </span>
+                </div>
+
+                <div className="w-px h-12 bg-border-light" />
+
               <div className="flex items-center gap-3">
                 <button
                   type="button"
@@ -794,6 +824,7 @@ export default function FeaturedAds() {
                     ? "Active — visible on hero gallery"
                     : "Hidden from gallery"}
                 </span>
+              </div>
               </div>
             </div>
 
