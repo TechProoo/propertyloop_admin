@@ -55,8 +55,16 @@ export function useChat(): UseChatReturn {
         return prev;
       });
 
-      setConversations((prev) =>
-        prev.map((c) =>
+      setConversations((prev) => {
+        const exists = prev.some((c) => c.id === msg.conversationId);
+        if (!exists) {
+          messagesService
+            .listConversations({ limit: 50 })
+            .then((res) => setConversations(res.items))
+            .catch(() => {});
+          return prev;
+        }
+        return prev.map((c) =>
           c.id === msg.conversationId
             ? {
                 ...c,
@@ -66,8 +74,8 @@ export function useChat(): UseChatReturn {
                 unread: msg.isYou ? c.unread : c.unread + 1,
               }
             : c,
-        ),
-      );
+        );
+      });
 
       if (!msg.isYou) setUnreadCount((prev) => prev + 1);
     });
@@ -107,6 +115,16 @@ export function useChat(): UseChatReturn {
       );
     });
 
+    socket.on("new_conversation", () => {
+      messagesService
+        .listConversations({ limit: 50 })
+        .then((res) => {
+          setConversations(res.items);
+          setUnreadCount(res.items.reduce((sum, c) => sum + c.unread, 0));
+        })
+        .catch(() => {});
+    });
+
     messagesService
       .listConversations({ limit: 50 })
       .then((res) => {
@@ -124,6 +142,7 @@ export function useChat(): UseChatReturn {
       socket.off("unread_update");
       socket.off("user_typing");
       socket.off("conversation_read");
+      socket.off("new_conversation");
     };
   }, []);
 
