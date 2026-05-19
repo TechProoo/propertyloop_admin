@@ -14,11 +14,7 @@ export interface User {
 }
 
 export type SubscriptionTier = "FOUNDING" | "STANDARD" | "PRO";
-export type SubscriptionStatus =
-  | "ACTIVE"
-  | "GRACE_PERIOD"
-  | "LAPSED"
-  | "CANCELLED";
+export type SubscriptionStatus = "ACTIVE" | "LAPSED" | "CANCELLED";
 
 export interface AgentProfile {
   id?: string;

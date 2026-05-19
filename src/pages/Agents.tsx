@@ -277,16 +277,10 @@ export default function Agents() {
                             <CreditCard className="w-3 h-3" /> Standard
                           </Pill>
                         )}
-                        {/* Subscription status badge (only for lapsed/grace) */}
+                        {/* Subscription status badge (only when lapsed) */}
                         {u.agentProfile?.subscriptionStatus === "LAPSED" && (
                           <Pill variant="danger">
                             <AlertTriangle className="w-3 h-3" /> Lapsed
-                          </Pill>
-                        )}
-                        {u.agentProfile?.subscriptionStatus ===
-                          "GRACE_PERIOD" && (
-                          <Pill variant="warn">
-                            <AlertTriangle className="w-3 h-3" /> Grace Period
                           </Pill>
                         )}
                       </div>
@@ -413,7 +407,6 @@ export default function Agents() {
                   className="w-full h-11 px-4 rounded-xl border border-gray-200 text-sm text-primary-dark bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 >
                   <option value="ACTIVE">Active</option>
-                  <option value="GRACE_PERIOD">Grace Period</option>
                   <option value="LAPSED">Lapsed</option>
                   <option value="CANCELLED">Cancelled</option>
                 </select>
