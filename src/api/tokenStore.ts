@@ -1,19 +1,18 @@
-const ACCESS_KEY = "pl_admin_access";
-const REFRESH_KEY = "pl_admin_refresh";
+// Refresh token now lives in an HttpOnly Secure cookie on /api/auth
+// (set by the backend on login/refresh). Access token lives only in
+// memory — lost on full page reload, recovered by calling /auth/refresh
+// during AuthContext bootstrap.
+
+let accessToken: string | null = null;
 
 export const tokenStore = {
   getAccess(): string | null {
-    return localStorage.getItem(ACCESS_KEY);
+    return accessToken;
   },
-  getRefresh(): string | null {
-    return localStorage.getItem(REFRESH_KEY);
-  },
-  set(access: string, refresh: string) {
-    localStorage.setItem(ACCESS_KEY, access);
-    localStorage.setItem(REFRESH_KEY, refresh);
+  setAccess(token: string | null) {
+    accessToken = token;
   },
   clear() {
-    localStorage.removeItem(ACCESS_KEY);
-    localStorage.removeItem(REFRESH_KEY);
+    accessToken = null;
   },
 };

@@ -5,6 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { api } from "@/api/client";
 import { authService } from "@/api/services";
 import { tokenStore } from "@/api/tokenStore";
 import type { User } from "@/api/types";
@@ -25,11 +26,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
     const init = async () => {
-      if (!tokenStore.getAccess()) {
-        setLoading(false);
-        return;
-      }
+      // No access token in memory after a page reload (refresh token is an
+      // HttpOnly cookie, not localStorage). Try /auth/refresh to mint one
+      // from the cookie. If the cookie is missing/expired we treat the
+      // user as logged out.
       try {
+        const { data } = await api.post<{ accessToken: string }>(
+          "/auth/refresh",
+          {},
+        );
+        tokenStore.setAccess(data.accessToken);
         const me = await authService.me();
         if (active) setUser(me);
       } catch {
@@ -49,7 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (res.user.role !== "ADMIN") {
       throw new Error("This account doesn't have admin access.");
     }
-    tokenStore.set(res.accessToken, res.refreshToken);
+    // Backend set the refresh token as a cookie; we only stash the
+    // access token in memory for the bearer header.
+    tokenStore.setAccess(res.accessToken);
     setUser(res.user);
     return res.user;
   };
