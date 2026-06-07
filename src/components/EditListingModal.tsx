@@ -106,6 +106,18 @@ export default function EditListingModal({ listing, onClose, onSaved }: Props) {
           .map((s) => s.trim())
           .filter(Boolean),
       };
+
+      // The backend validates virtualTourUrl/videoUrl with @IsUrl()+@IsOptional().
+      // class-validator's @IsOptional only skips null/undefined — an empty
+      // string still hits @IsUrl() and 400s the whole save. Listings without a
+      // tour/video URL therefore can't be edited unless we drop the blank field.
+      const blankToUndefined = (v?: string) => {
+        const t = (v ?? "").trim();
+        return t.length > 0 ? t : undefined;
+      };
+      payload.virtualTourUrl = blankToUndefined(payload.virtualTourUrl);
+      payload.videoUrl = blankToUndefined(payload.videoUrl);
+
       const updated = await adminService.updateListing(listing.id, payload);
       onSaved(updated as Listing);
       onClose();
