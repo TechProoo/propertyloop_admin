@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Home, ChevronDown, MapPin, Bed, Bath, Pencil } from "lucide-react";
+import { Home, ChevronDown, MapPin, Bed, Bath, Pencil, Plus } from "lucide-react";
 import { adminService } from "@/api/services";
 import type { Listing, ListingStatus } from "@/api/types";
 import {
@@ -114,11 +115,19 @@ export default function Listings() {
         title="Listings"
         subtitle="Review, approve and moderate property listings."
         actions={
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder="Search by title, address, location…"
-          />
+          <>
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder="Search by title, address, location…"
+            />
+            <Link to="/listings/new">
+              <Button variant="primary">
+                <Plus className="w-4 h-4" />
+                Add listing
+              </Button>
+            </Link>
+          </>
         }
       />
 

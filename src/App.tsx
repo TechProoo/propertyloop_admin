@@ -6,6 +6,7 @@ import { ActionOverlay } from "@/components/ui";
 import Login from "@/pages/Login";
 import Overview from "@/pages/Overview";
 import Listings from "@/pages/Listings";
+import AddListing from "@/pages/AddListing";
 import Viewings from "@/pages/Viewings";
 import Agents from "@/pages/Agents";
 import Vendors from "@/pages/Vendors";
@@ -33,6 +34,7 @@ export default function App() {
           >
             <Route index element={<Overview />} />
             <Route path="listings" element={<Listings />} />
+            <Route path="listings/new" element={<AddListing />} />
             <Route path="viewings" element={<Viewings />} />
             <Route path="agents" element={<Agents />} />
             <Route path="vendors" element={<Vendors />} />

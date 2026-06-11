@@ -39,6 +39,30 @@ export type UpdateListingPayload = {
   status?: ListingStatus;
 };
 
+// Admin creates a listing on behalf of an agent. `agentId` and `status` are the
+// admin-only additions; everything else mirrors what an agent submits.
+export type CreateListingPayload = {
+  agentId: string;
+  title: string;
+  type: "SALE" | "RENT" | "SHORTLET";
+  propertyType: string;
+  priceNaira: number;
+  period?: string;
+  address: string;
+  location: string;
+  beds: number;
+  baths: number;
+  sqft: string;
+  yearBuilt?: string;
+  description: string;
+  features: string[];
+  coverImage: string;
+  images: string[];
+  virtualTourUrl?: string;
+  videoUrl?: string;
+  status?: ListingStatus;
+};
+
 // ─── Auth ────────────────────────────────────────────────────────────────
 
 export const authService = {
@@ -102,6 +126,10 @@ export const adminService = {
   },
   async updateListing(id: string, payload: UpdateListingPayload) {
     const { data } = await api.patch<Listing>(`/admin/listings/${id}`, payload);
+    return data;
+  },
+  async createListing(payload: CreateListingPayload) {
+    const { data } = await api.post<Listing>("/admin/listings", payload);
     return data;
   },
 
